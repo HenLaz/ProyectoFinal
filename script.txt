@@ -1,0 +1,194 @@
+-- Creamos la base de datos
+CREATE SCHEMA IF NOT EXISTS tienda;
+
+-- Tabla carretillaanon
+CREATE TABLE IF NOT EXISTS tienda.carretillaanon (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    anoncod VARCHAR(255) NOT NULL,
+    codprd INT NOT NULL,
+    crrctd INT NOT NULL,
+    crrprc DECIMAL(10,2) NOT NULL,
+    crrfching DATETIME NOT NULL,
+    FOREIGN KEY (codprd) REFERENCES productos(codprd) ON DELETE CASCADE,
+    INDEX (anoncod)
+);
+
+-- Tabla carretilla
+CREATE TABLE IF NOT EXISTS tienda.carretilla (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usercod VARCHAR(255) NOT NULL,
+    codprd INT NOT NULL,
+    crrctd INT NOT NULL,
+    crrprc DECIMAL(10,2) NOT NULL,
+    crrfching DATETIME NOT NULL,
+    FOREIGN KEY (codprd) REFERENCES productos(codprd) ON DELETE CASCADE,
+    INDEX (usercod)
+);
+
+-- Tabla productos
+CREATE TABLE IF NOT EXISTS tienda.productos (
+    codprd INT AUTO_INCREMENT PRIMARY KEY,
+    descripcionProducto TEXT NOT NULL,
+    nombreProducto VARCHAR(255) NOT NULL,
+    estadoProducto ENUM('ACT', 'DSC') NOT NULL,
+    stockProducto INT NOT NULL,
+    imagen VARCHAR(255),
+    INDEX (estadoProducto)
+);
+
+-- Tabla usuario
+CREATE TABLE IF NOT EXISTS tienda.usuario (
+  usercod bigint NOT NULL AUTO_INCREMENT,
+  useremail varchar(80) DEFAULT NULL,
+  username varchar(80) DEFAULT NULL,
+  userpswd varchar(128) DEFAULT NULL,
+  userfching datetime DEFAULT NULL,
+  userpswdest char(3) DEFAULT NULL,
+  userpswdexp datetime DEFAULT NULL,
+  userest char(3) DEFAULT NULL,
+  useractcod varchar(128) DEFAULT NULL,
+  userpswdchg varchar(128) DEFAULT NULL,
+  usertipo char(3) DEFAULT NULL COMMENT 'Tipo de Usuario, Normal, Consultor o Cliente',
+  PRIMARY KEY (usercod),
+  UNIQUE KEY useremail_UNIQUE (useremail),
+  KEY usertipo (usertipo,useremail,usercod,userest)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
+
+-- Tabla roles
+CREATE TABLE IF NOT EXISTS tienda.roles (
+  rolescod varchar(15) NOT NULL,
+  rolesdsc varchar(45) DEFAULT NULL,
+  rolesest char(3) DEFAULT NULL,
+  PRIMARY KEY (rolescod)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tabla funciones
+CREATE TABLE IF NOT EXISTS tienda.funciones (
+  fncod varchar(255) NOT NULL,
+  fndsc varchar(45) DEFAULT NULL,
+  fnest char(3) DEFAULT NULL,
+  fntyp char(3) DEFAULT NULL,
+  PRIMARY KEY (fncod)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tabla roles_usuarios
+CREATE TABLE IF NOT EXISTS tienda.roles_usuarios (
+  usercod bigint NOT NULL,
+  rolescod varchar(15) NOT NULL,
+  roleuserest char(3) DEFAULT NULL,
+  roleuserfch datetime DEFAULT NULL,
+  roleuserexp datetime DEFAULT NULL,
+  PRIMARY KEY (usercod,rolescod),
+  KEY rol_usuario_key_idx (rolescod),
+  CONSTRAINT rol_usuario_key FOREIGN KEY (rolescod) REFERENCES roles (rolescod),
+  CONSTRAINT usuario_rol_key FOREIGN KEY (usercod) REFERENCES usuario (usercod)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tabla funciones_roles
+CREATE TABLE IF NOT EXISTS tienda.funciones_roles (
+  rolescod varchar(15) NOT NULL,
+  fncod varchar(255) NOT NULL,
+  fnrolest char(3) DEFAULT NULL,
+  fnexp datetime DEFAULT NULL,
+  PRIMARY KEY (rolescod,fncod),
+  KEY rol_funcion_key_idx (fncod),
+  CONSTRAINT funcion_rol_key FOREIGN KEY (rolescod) REFERENCES roles (rolescod),
+  CONSTRAINT rol_funcion_key FOREIGN KEY (fncod) REFERENCES funciones (fncod)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Inserts para la tabla usuario
+INSERT INTO tienda.usuario (useremail, username, userpswd, userfching, userpswdest, userpswdexp, userest, useractcod, userpswdchg, usertipo)
+VALUES 
+('ejemplo@correo.com', 'Usuario Ejemplo', '123', '2024-04-17 12:00:00', 'NO', NULL, 'ACT', 'codigo_activacion', NULL, 'NRM');
+
+-- Inserts para la tabla roles
+INSERT INTO tienda.roles VALUES 
+('ADM','Administrador','ACT'),
+('EMP','Empleado','ACT'),
+('ORG','Organizador','ACT');
+
+-- Inserts para la tabla funciones
+INSERT INTO tienda.funciones VALUES 
+('Controllers/Admin/Admin','Controllers\\Admin\\Admin','ACT','ACT'),
+('Controllers\\Mnt\\Autor','Controllers\\Mnt\\Autor','ACT','CTR'),
+('Controllers\\Mnt\\Autores','Controllers\\Mnt\\Autores','ACT','CTR'),
+('Controllers\\Mnt\\Autores\\Delete','Controllers\\Mnt\\Autores\\Delete','ACT','CTR'),
+('Controllers\\Mnt\\Autores\\Edit','Controllers\\Mnt\\Autores\\Edit','ACT','CTR'),
+('Controllers\\Mnt\\Autores\\New','Controllers\\Mnt\\Autores\\New','ACT','CTR'),
+('Controllers\\Mnt\\Categorias','Controllers\\Mnt\\Categorias','ACT','CTR'),
+('Controllers\\Mnt\\Categorias\\Delete','Controllers\\Mnt\\Categorias\\Delete','ACT','CTR'),
+('Controllers\\Mnt\\Categorias\\Edit','Controllers\\Mnt\\Categorias\\Edit','ACT','CTR'),
+('Controllers\\Mnt\\Categorias\\New','Controllers\\Mnt\\Categorias\\New','ACT','CTR'),
+('Controllers\\Mnt\\Funcion_rol','Controllers\\Mnt\\Funcion_rol','ACT','CTR'),
+('Controllers\\Mnt\\Funciones','Controllers\\Mnt\\Funciones','ACT','CTR'),
+('Controllers\\Mnt\\Libro','Controllers\\Mnt\\Libro','ACT','CTR'),
+('Controllers\\Mnt\\Libro\\Delete','Controllers\\Mnt\\Libro\\Delete','ACT','CTR'),
+('Controllers\\Mnt\\Libro\\Edit','Controllers\\Mnt\\Libro\\Edit','ACT','CTR'),
+('Controllers\\Mnt\\Libro\\New','Controllers\\Mnt\\Libros\\New','ACT','CTR'),
+('Controllers\\Mnt\\LibroAutores','Controllers\\Mnt\\LibroAutores','ACT','CTR'),
+('Controllers\\Mnt\\Libros','Controllers\\Mnt\\Libros','ACT','CTR'),
+('Controllers\\Mnt\\Libros\\Delete','Controllers\\Mnt\\Libros\\Delete','ACT','CTR'),
+('Controllers\\Mnt\\Libros\\Edit','Controllers\\Mnt\\Libros\\Edit','ACT','CTR'),
+('Controllers\\Mnt\\Libros\\New','Controllers\\Mnt\\Libros\\New','ACT','CTR'),
+('Controllers\\Mnt\\Perfil','Controllers\\Mnt\\Perfil','ACT','CTR'),
+('Controllers\\Mnt\\Rol','Controllers\\Mnt\\Rol','ACT','CTR'),
+('Controllers\\Mnt\\Roles','Controllers\\Mnt\\Roles','ACT','CTR'),
+('Controllers\\Mnt\\Usuario','Controllers\\Mnt\\Usuario','ACT','CTR'),
+('Controllers\\Mnt\\Usuario\\Del','Controllers\\Mnt\\Usuario\\Del','ACT','CTR'),
+('Controllers\\Mnt\\Usuario\\Dsp','Controllers\\Mnt\\Usuario\\Dsp','ACT','CTR'),
+('Controllers\\Mnt\\Usuario\\New','Controllers\\Mnt\\Usuario\\New','ACT','CTR'),
+('Controllers\\Mnt\\Usuario\\Upd','Controllers\\Mnt\\Usuario\\Upd','ACT','CTR'),
+('Controllers\\Mnt\\Usuarios','Controllers\\Mnt\\Usuarios','ACT','CTR'),
+('Controllers\\Mnt\\Usuarios\\Delete','Controllers\\Mnt\\Usuarios\\Delete','ACT','CTR'),
+('Controllers\\Mnt\\Usuarios\\Edit','Controllers\\Mnt\\Usuarios\\Edit','ACT','CTR'),
+('Controllers\\Mnt\\Usuarios\\New','Controllers\\Mnt\\Usuarios\\New','ACT','CTR'),
+('MntUsuarios','MntUsuarios','ACT','CTR');
+
+-- Inserts para la tabla roles_usuarios
+INSERT INTO tienda.roles_usuarios VALUES 
+(12,'ADM','ACT','2022-07-02 17:35:00','2023-10-02 17:35:00'),
+(12,'ORG','ACT','2022-08-03 21:38:02','2023-08-03 21:38:02');
+
+INSERT INTO tienda.funciones (fncod, fndsc, fnest, fntyp) VALUES 
+('NuevoController', 'Descripción de la nueva función', 'ACT', 'CTR');
+
+-- Ahora puedes insertar la fila en funciones_roles
+INSERT INTO tienda.funciones_roles VALUES 
+('ADM', 'NuevoController', 'ACT', '2023-01-01 00:00:00');
+
+
+
+-- Inserts para la tabla funciones_roles
+INSERT INTO tienda.funciones_roles VALUES 
+('ADM','Controllers\\Admin\\Admin','ACT','2030-08-01 00:00:00'),
+('ADM','Controllers\\Mnt\\Autores','ACT','2023-07-28 16:42:38'),
+('ADM','Controllers\\Mnt\\Autores\\Delete','ACT','2023-08-03 00:00:00'),
+('ADM','Controllers\\Mnt\\Autores\\Edit','ACT','2023-08-03 00:00:00'),
+('ADM','Controllers\\Mnt\\Autores\\New','ACT','2023-08-03 00:00:00'),
+('ADM','Controllers\\Mnt\\Categorias','ACT','2023-02-08 00:00:00'),
+('ADM','Controllers\\Mnt\\Categorias\\Delete','ACT','2023-02-08 00:00:00'),
+('ADM','Controllers\\Mnt\\Categorias\\Edit','ACT','2023-08-02 00:00:00'),
+('ADM','Controllers\\Mnt\\Categorias\\New','ACT','2023-08-02 00:00:00'),
+('ADM','Controllers\\Mnt\\Funcion_rol','ACT','2030-08-01 00:00:00'),
+('ADM','Controllers\\Mnt\\Funciones','ACT','2023-07-02 19:26:52'),
+('ADM','Controllers\\Mnt\\Libro\\Delete','ACT','2023-02-08 00:00:00'),
+('ADM','Controllers\\Mnt\\Libro\\Edit','ACT','2023-02-08 00:00:00'),
+('ADM','Controllers\\Mnt\\Libro\\New','ACT','2023-02-08 00:00:00'),
+('ADM','Controllers\\Mnt\\LibroAutores','ACT','2023-07-02 00:00:00'),
+('ADM','Controllers\\Mnt\\Libros','ACT','2023-07-28 16:42:42'),
+('ADM','Controllers\\Mnt\\Libros\\Delete','ACT','2023-07-02 00:00:00'),
+('ADM','Controllers\\Mnt\\Libros\\Edit','ACT','2023-07-02 00:00:00'),
+('ADM','Controllers\\Mnt\\Libros\\New','ACT','2023-08-02 00:00:00'),
+('ADM','Controllers\\Mnt\\Perfil','ACT','2023-07-02 00:00:00'),
+('ADM','Controllers\\Mnt\\Rol','ACT','2030-08-01 00:00:00'),
+('ADM','Controllers\\Mnt\\Roles','ACT','2030-08-01 00:00:00'),
+('ADM','Controllers\\Mnt\\Usuario','ACT','2023-08-02 00:00:00'),
+('ADM','Controllers\\Mnt\\Usuario\\Del','ACT','2030-08-01 00:00:00'),
+('ADM','Controllers\\Mnt\\Usuario\\Dsp','ACT','2030-08-01 00:00:00'),
+('ADM','Controllers\\Mnt\\Usuario\\New','ACT','2030-08-01 00:00:00'),
+('ADM','Controllers\\Mnt\\Usuario\\Upd','ACT','2030-08-01 00:00:00'),
+('ADM','Controllers\\Mnt\\Usuarios','ACT','2030-08-01 00:00:00'),
+('ADM','Controllers\\Mnt\\Usuarios\\Delete','ACT','2030-08-01 00:00:00'),
+('ADM','Controllers\\Mnt\\Usuarios\\Edit','ACT','2030-08-01 00:00:00'),
+('ADM','Controllers\\Mnt\\Usuarios\\New','ACT','2030-08-01 00:00:00'),
+('ADM','MntUsuarios','ACT','2023-07-02 19:27:01');
